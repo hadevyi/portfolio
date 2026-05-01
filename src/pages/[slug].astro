@@ -1,0 +1,71 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteMeta } from '../data/site';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project }
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const links = Object.entries(project.data.links ?? {}).filter(([, value]) => Boolean(value));
+const linkLabels: Record<string, string> = {
+  live: '라이브 보기',
+  repo: '저장소 보기',
+  reference: '관련 페이지 보기'
+};
+---
+
+<BaseLayout title={project.data.title} description={project.data.summary}>
+  <article class="space-y-10">
+    <section class="grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+      <div>
+        <p class="eyebrow">Project Detail</p>
+        <h1 class="type-display mt-5 text-ink">
+          {project.data.title}
+        </h1>
+        <p class="type-body mt-6 max-w-2xl text-ink/72">
+          {project.data.summary}
+        </p>
+      </div>
+
+      <div class="surface-card p-6 sm:p-7">
+        <p class="type-label-wide uppercase text-ink/40">Meta</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="chip">{project.data.period}</span>
+          <span class="chip">{project.data.status}</span>
+          {project.data.stack.map((item) => <span class="chip">{item}</span>)}
+        </div>
+
+        <div class="mt-7 flex flex-wrap gap-3">
+          <a href={siteMeta.rootPath} class="button-primary type-small px-4 py-2">
+            목록으로 돌아가기
+          </a>
+          {
+            links.map(([key, value]) => (
+              <a href={value} class="button-secondary type-small px-4 py-2">
+                {linkLabels[key] ?? key}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="surface-card p-8 sm:p-10 lg:p-12">
+      <div class="rich-text mx-auto max-w-3xl">
+        <Content />
+      </div>
+    </section>
+  </article>
+</BaseLayout>

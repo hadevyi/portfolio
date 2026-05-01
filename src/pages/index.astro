@@ -1,0 +1,51 @@
+---
+import { getCollection } from 'astro:content';
+import ContentCard from '../components/ContentCard.astro';
+import PageIntro from '../components/PageIntro.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const projectPrinciples = [
+  '무엇을 만들었는지보다 어떤 문제를 풀었는지를 먼저 보이게 둡니다.',
+  '메인 화면에서는 목록 위주로 훑고, 자세한 내용은 상세 페이지에서 읽도록 분리합니다.',
+  '포트폴리오의 설명은 경험 정리나 블로그와 이어질 수 있도록 구성합니다.'
+] as const;
+---
+
+<BaseLayout>
+  <div class="space-y-12">
+    <PageIntro
+      eyebrow="Portfolio"
+      title="대표 프로젝트를 빠르게 훑고, 필요할 때 상세로 들어가는 포트폴리오"
+      description="이 페이지도 시각적인 스타일은 모두 걷어낸 상태입니다. 지금은 어떤 프로젝트를 어떤 기준으로 보여줄지 확인하는 구조만 남겨둡니다."
+    />
+
+    <section class="surface-card p-6">
+      <h2 class="type-section-title text-ink">
+        정리 기준
+      </h2>
+      <ul class="type-body mt-4 space-y-2 text-ink/68">
+        {projectPrinciples.map((item) => <li>{item}</li>)}
+      </ul>
+    </section>
+
+    <section class="space-y-4">
+      <h2 class="type-section-title text-ink">
+        프로젝트 목록
+      </h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        {
+          projects.map((project) => (
+            <ContentCard
+              href={`/portfolio/${project.id}/`}
+              title={project.data.title}
+              description={project.data.summary}
+              meta={`${project.data.period} · ${project.data.status}`}
+              tags={project.data.stack}
+            />
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</BaseLayout>
