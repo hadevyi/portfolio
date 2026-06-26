@@ -6,7 +6,7 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://hadevyi.github.io/portfolio/',
+  site: 'https://hadevyi.github.io',
   base: '/portfolio',
   output: 'static',
   vite: {

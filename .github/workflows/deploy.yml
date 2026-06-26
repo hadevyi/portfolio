@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
-      PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.PUBLIC_GOOGLE_SITE_VERIFICATION }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

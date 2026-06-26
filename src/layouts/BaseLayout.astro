@@ -16,7 +16,6 @@ const canonicalUrl = new URL(Astro.url.pathname, siteMeta.siteUrl).toString();
 const faviconSvg = `${siteMeta.rootPath}favicon.svg?v=hadevyi-mark-a1`;
 const faviconIco = `${siteMeta.rootPath}favicon.ico`;
 const gaId = import.meta.env.PUBLIC_GA_ID;
-const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 ---
 
 <!doctype html>
@@ -54,9 +53,6 @@ const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
-    {googleSiteVerification && (
-      <meta name="google-site-verification" content={googleSiteVerification} />
-    )}
     {
       gaId && (
         <>
