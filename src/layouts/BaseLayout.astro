@@ -67,6 +67,16 @@ const gaId = import.meta.env.PUBLIC_GA_ID;
         </>
       )
     }
+    <script is:inline>
+      window.hadevyiTrackEvent = function (eventName, params = {}) {
+        if (typeof window.gtag !== 'function') return;
+
+        window.gtag('event', eventName, {
+          site_area: 'portfolio',
+          ...params
+        });
+      };
+    </script>
   </head>
   <body>
     <div class="relative min-h-screen overflow-x-hidden">

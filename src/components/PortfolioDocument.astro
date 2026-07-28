@@ -738,6 +738,34 @@ const getDetailLines = (value?: string): string[] => value?.split('\n').map((lin
     });
   });
 
+  const trackEvent = (eventName: string, params: Record<string, string> = {}) => {
+    const tracker = (window as Window & {
+      hadevyiTrackEvent?: (eventName: string, params?: Record<string, string>) => void;
+    }).hadevyiTrackEvent;
+
+    if (typeof tracker === 'function') {
+      tracker(eventName, params);
+    }
+  };
+
+  document.querySelectorAll('[data-portfolio-download]').forEach((link) => {
+    link.addEventListener('click', () => {
+      trackEvent('portfolio_pdf_download', {
+        portfolio_type: link.getAttribute('data-portfolio-track') || '',
+        language: link.getAttribute('data-portfolio-language') || ''
+      });
+    });
+  });
+
+  document.querySelectorAll('[data-portfolio-language-link]').forEach((link) => {
+    link.addEventListener('click', () => {
+      trackEvent('portfolio_language_change', {
+        portfolio_type: link.getAttribute('data-portfolio-track') || '',
+        language: link.getAttribute('data-portfolio-language') || ''
+      });
+    });
+  });
+
   const portfolioSlides = Array.from(document.querySelectorAll<HTMLElement>('[data-portfolio-slide]'));
   if (portfolioSlides.length > 0) {
     const portfolioIndexLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-portfolio-index-link]'));
