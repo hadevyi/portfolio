@@ -1,0 +1,858 @@
+---
+import { portfolioContent, type PortfolioLanguage, type PortfolioTrack } from '../data/portfolio';
+import portfolioDownloads from '../data/portfolioDownloads.json';
+import { portfolioSlides, type PortfolioSlide } from '../data/portfolioSlides';
+
+interface Props {
+  track?: PortfolioTrack;
+  language?: PortfolioLanguage;
+}
+
+const { track = 'developer', language = 'ko' } = Astro.props;
+const content = portfolioContent[track][language];
+const slides: readonly PortfolioSlide[] = portfolioSlides[track][language];
+const downloadDocument = portfolioDownloads.find((document) => document.track === track && document.language === language);
+const downloadPdf = downloadDocument ? `/portfolio/downloads/${downloadDocument.fileName}` : null;
+const lastUpdated = '2026.06.28';
+const copyrightNotice = '© 2026 Dang Hyeona. All rights reserved.';
+const privateDocumentNote = 'privateDocumentNote' in content.meta ? content.meta.privateDocumentNote : null;
+const languageLinks =
+  track === 'instructor'
+    ? {
+        ko: '/portfolio/instructor/ko',
+        en: '/portfolio/instructor/en'
+      }
+    : {
+        ko: '/portfolio/ko',
+        en: '/portfolio/en'
+      };
+const displayName = language === 'ko' ? '당현아' : 'Dang Hyeona';
+const coverKeywordLabel = language === 'ko' ? '포트폴리오 핵심 키워드' : 'Portfolio keywords';
+const coverContactLabel = language === 'ko' ? '연락처' : 'Contact';
+const levelLegendTitle = language === 'ko' ? '활용 수준' : 'Usage level';
+const levelLegendItems =
+  language === 'ko'
+    ? [
+        { level: '1칸', label: '기초 구현' },
+        { level: '2칸', label: '기능 구현' },
+        { level: '3칸', label: '프로젝트 적용' },
+        { level: '4칸', label: '실무 적용' },
+        { level: '5칸', label: '운영/개선 경험' }
+      ]
+    : [
+        { level: '1 bar', label: 'Basic build' },
+        { level: '2 bars', label: 'Feature build' },
+        { level: '3 bars', label: 'Project' },
+        { level: '4 bars', label: 'Work use' },
+        { level: '5 bars', label: 'Improve/Ops' }
+      ];
+const contactItems =
+  language === 'ko'
+    ? [
+        { label: 'Mail', value: 'hadevyi@gmail.com', href: 'mailto:hadevyi@gmail.com' },
+        { label: 'GitHub', value: '@hadevyi', href: 'https://github.com/hadevyi', external: true },
+        { label: 'Blog', value: 'hadevyi.github.io/blog', href: 'https://hadevyi.github.io/blog/', external: true }
+      ]
+    : [
+        { label: 'Mail', value: 'hadevyi@gmail.com', href: 'mailto:hadevyi@gmail.com' },
+        { label: 'GitHub', value: '@hadevyi', href: 'https://github.com/hadevyi', external: true },
+        { label: 'Blog', value: 'hadevyi.github.io/blog', href: 'https://hadevyi.github.io/blog/', external: true }
+      ];
+const getDetailLines = (value?: string): string[] => value?.split('\n').map((line) => line.trim()).filter(Boolean) ?? [];
+---
+
+<div class={`portfolio-document portfolio-document--${track} portfolio-document--${language} portfolio-deck`}>
+  <section class="portfolio-deck-stage" aria-label={content.eyebrow}>
+    {
+      slides.map((slide, index) => (
+        <article
+          id={`portfolio-slide-${index + 1}`}
+          class={`portfolio-page portfolio-page--${slide.variant}${slide.compactProjectLayout ? ' portfolio-page--compact-project' : ''} portfolio-slide-${index + 1}`}
+          data-portfolio-slide
+          data-portfolio-slide-index={index}
+          data-portfolio-slide-title={slide.eyebrow}
+        >
+          {slide.variant !== 'cover' && slide.variant !== 'career' && slide.variant !== 'career-map' && slide.variant !== 'achievement' && slide.variant !== 'ai-practice' && !slide.compactProjectLayout && (
+            <header class="portfolio-page-heading">
+              <span aria-hidden="true"></span>
+              <p>{slide.eyebrow}</p>
+            </header>
+          )}
+
+          {slide.variant === 'cover' ? (
+            <div class="portfolio-cover-layout">
+              <div class="portfolio-cover-copy">
+                <h1>{displayName}</h1>
+                <strong>{slide.title}</strong>
+                <p>{slide.message}</p>
+                {slide.tags && (
+                  <ul class="portfolio-cover-tags" aria-label={coverKeywordLabel}>
+                    {slide.tags.map((tag) => (
+                      <li>{tag}</li>
+                    ))}
+                  </ul>
+                )}
+                <dl class="portfolio-cover-contact" aria-label={coverContactLabel}>
+                  {contactItems.map((item) => (
+                    <div>
+                      <dt>{item.label}</dt>
+                      <dd>
+                        <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined}>
+                          {item.value}
+                        </a>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+              {slide.image && (
+                <figure class="portfolio-cover-image">
+                  <img src={slide.image.src} alt={slide.image.alt} loading="eager" decoding="async" />
+                </figure>
+              )}
+            </div>
+          ) : slide.variant === 'career' ? (
+            <div class="portfolio-career-layout">
+              <section class="portfolio-career-map">
+                <div class="portfolio-career-intro">
+                  <div>
+                    <h1>{slide.title}</h1>
+                    <p>{slide.message}</p>
+                  </div>
+                  <aside class="portfolio-level-legend" aria-label={levelLegendTitle}>
+                    <p>{levelLegendTitle}</p>
+                    <ol>
+                      {levelLegendItems.map((item) => (
+                        <li>
+                          <span>{item.level}</span>
+                          <strong>{item.label}</strong>
+                        </li>
+                      ))}
+                    </ol>
+                  </aside>
+                </div>
+                <div class="portfolio-tech-grid">
+                  {slide.primaryItems.map((item) => (
+                    <section>
+                      <div class="portfolio-tech-card-header">
+                        {item.icon?.startsWith('/') ? (
+                          <span class="portfolio-tech-logo" aria-hidden="true">
+                            <img src={item.icon} alt="" loading="lazy" decoding="async" />
+                          </span>
+                        ) : (
+                          <span class="portfolio-tech-logo" aria-hidden="true">{item.icon || item.label.slice(0, 2)}</span>
+                        )}
+                        <div>
+                          <p>{item.label}</p>
+                          <h2>{item.title}</h2>
+                        </div>
+                      </div>
+                      <div
+                        class="portfolio-tech-level"
+                        aria-label={language === 'ko' ? `${item.title} 활용 수준 ${item.meta || '0'} / 5` : `${item.title} proficiency ${item.meta || '0'} of 5`}
+                      >
+                        {Array.from({ length: 5 }, (_, levelIndex) => (
+                          <span class={levelIndex < Number(item.meta || 0) ? 'is-active' : ''}></span>
+                        ))}
+                      </div>
+                      <p>{item.description}</p>
+                      {item.tags && (
+                        <ul class="portfolio-tech-tags" aria-label={language === 'ko' ? `${item.title} 관련 기술` : `${item.title} related skills`}>
+                          {item.tags.map((tag) => (
+                            <li>{tag}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              </section>
+              {slide.secondaryItems && (
+                <aside class="portfolio-career-summary">
+                  <p>{language === 'ko' ? '제품 확장 경험' : 'Product scaling experience'}</p>
+                  <div>
+                    {slide.secondaryItems.map((item) => (
+                      <section>
+                        <span>{item.label}</span>
+                        <h2>{item.title}</h2>
+                        <p>{item.description}</p>
+                        {item.tags && (
+                          <ul>
+                            {item.tags.map((tag) => (
+                              <li>{tag}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </section>
+                    ))}
+                  </div>
+                </aside>
+              )}
+            </div>
+          ) : slide.variant === 'career-map' ? (
+            <div class="portfolio-career-flow-layout">
+              <section class="portfolio-career-flow-copy">
+                <h1>{slide.title}</h1>
+                <p>{slide.message}</p>
+              </section>
+              <ol class="portfolio-career-flow-list">
+                {slide.primaryItems.map((item, itemIndex) => (
+                  <li class={`portfolio-career-flow-item ${itemIndex === slide.primaryItems.length - 1 ? 'is-featured' : ''}`}>
+                    <div>
+                      <header class="portfolio-career-flow-card-header">
+                        <span>{item.label}</span>
+                        {item.employmentType && <small>{item.employmentType}</small>}
+                      </header>
+                      <div class="portfolio-career-flow-card-body">
+                        <h2>{item.title}</h2>
+                        {item.description && <p>{item.description}</p>}
+                      </div>
+                      {(item.meta || item.role) && (
+                        <dl class="portfolio-career-flow-detail">
+                          {item.meta && (
+                            <>
+                              <dt>{language === 'ko' ? '기술' : 'Tech'}</dt>
+                              <dd>
+                                {getDetailLines(item.meta).length > 1 ? (
+                                  <ul>
+                                    {getDetailLines(item.meta).map((line) => (
+                                      <li>{line}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  item.meta
+                                )}
+                              </dd>
+                            </>
+                          )}
+                          {item.role && (
+                            <>
+                              <dt>{language === 'ko' ? '역할' : 'Role'}</dt>
+                              <dd>
+                                {getDetailLines(item.role).length > 1 ? (
+                                  <ul>
+                                    {getDetailLines(item.role).map((line) => (
+                                      <li>{line}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  item.role
+                                )}
+                              </dd>
+                            </>
+                          )}
+                        </dl>
+                      )}
+                      {(item.work || item.outcome) && (
+                        <div class="portfolio-career-flow-proof">
+                          {item.work && (
+                            <section>
+                              <h3>{language === 'ko' ? '작업' : 'Work'}</h3>
+                              {getDetailLines(item.work).length > 1 ? (
+                                <ul>
+                                  {getDetailLines(item.work).map((line) => (
+                                    <li>{line}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p>{item.work}</p>
+                              )}
+                            </section>
+                          )}
+                          {item.outcome && (
+                            <section>
+                              <h3>{language === 'ko' ? '성과' : 'Outcome'}</h3>
+                              {getDetailLines(item.outcome).length > 1 ? (
+                                <ul>
+                                  {getDetailLines(item.outcome).map((line) => (
+                                    <li>{line}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p>{item.outcome}</p>
+                              )}
+                            </section>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : slide.variant === 'ai-practice' ? (
+            <div class="portfolio-ai-practice-layout">
+              <header class="portfolio-ai-practice-intro">
+                <div>
+                  <h1>{slide.title}</h1>
+                </div>
+                <p>{slide.message}</p>
+              </header>
+              {slide.decisionFlow && (
+                <figure class="portfolio-ai-practice-diagram">
+                  <figcaption>{language === 'ko' ? 'AI 활용 의사결정 플로우' : 'AI-assisted decision flow'}</figcaption>
+                  <ol class="portfolio-ai-practice-diagram-track" aria-label={language === 'ko' ? 'AI 활용 의사결정 흐름' : 'AI-assisted decision flow'}>
+                    {slide.decisionFlow.map((step, stepIndex) => (
+                      <li>
+                        <span>{String(stepIndex + 1).padStart(2, '0')}</span>
+                        <strong>{step.title}</strong>
+                        <p>{step.description}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </figure>
+              )}
+              <ol class="portfolio-ai-practice-grid">
+                {slide.primaryItems.map((item, itemIndex) => (
+                  <li>
+                    <article class="portfolio-ai-practice-item">
+                      <div class="portfolio-ai-practice-item-topline">
+                        <span>{String(itemIndex + 1).padStart(2, '0')}</span>
+                        <p>{item.label}</p>
+                      </div>
+                      <h2>{item.title}</h2>
+                      {item.description && <p class="portfolio-ai-practice-description">{item.description}</p>}
+                      {item.entryDetails && (
+                        <ul class="portfolio-ai-practice-entries">
+                          {item.entryDetails.map((entry) => (
+                            <li>
+                              <span>{entry.date}</span>
+                              <div>
+                                <strong>{entry.title}</strong>
+                                {entry.description && <p>{entry.description}</p>}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </article>
+                  </li>
+                ))}
+              </ol>
+              <footer class="portfolio-ai-practice-principle">
+                <span>{language === 'ko' ? '핵심 결과' : 'Key outcome'}</span>
+                <strong>{language === 'ko' ? '개인 활용 → 팀 공용화' : 'Individual use → Shared team practice'}</strong>
+                <p>
+                  {language === 'ko'
+                    ? '팀 공용 setup·skill과 사용 기준을 정리해 반복 업무에 재사용할 수 있는 개발 환경으로 확장했습니다.'
+                    : 'Turned shared setup, skills, and usage criteria into a reusable development environment for recurring work.'}
+                </p>
+              </footer>
+            </div>
+          ) : slide.variant === 'achievement' ? (
+            <div class="portfolio-achievement-layout">
+              <header class="portfolio-achievement-intro">
+                <h1>{slide.title}</h1>
+                <p>{slide.message}</p>
+              </header>
+              {slide.primaryItems.length > 0 && (
+                <ul class="portfolio-achievement-grid">
+                  {slide.primaryItems.map((item) => (
+                    <li class="portfolio-achievement-item">
+                      <article class="portfolio-achievement-copy">
+                        <header class="portfolio-achievement-context">
+                          {item.label && <p>{item.label}</p>}
+                          <h2>{item.title}</h2>
+                          <p>{item.description}</p>
+                        </header>
+                        {item.entryDetails && (
+                          <ul class="portfolio-achievement-entries">
+                            {item.entryDetails.map((entry) => (
+                              <li>
+                                <p>{entry.date}</p>
+                                <strong>{entry.title}</strong>
+                                {entry.description && <span>{entry.description}</span>}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {!item.entryDetails && item.entries && (
+                          <ul class="portfolio-achievement-entries">
+                            {item.entries.map((entry) => <li>{entry}</li>)}
+                          </ul>
+                        )}
+                        {!item.entryDetails && !item.entries && item.tags && (
+                          <ul class="portfolio-achievement-tags">
+                            {item.tags.map((tag) => <li>{tag}</li>)}
+                          </ul>
+                        )}
+                      </article>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : slide.variant === 'placeholder' ? (
+            <div class="portfolio-placeholder-layout">
+              <div class="portfolio-placeholder-mark" aria-hidden="true"></div>
+            </div>
+          ) : slide.variant === 'timeline' ? (
+            <div class="portfolio-intro-layout">
+              <section class="portfolio-intro-statement">
+                {slide.image && (
+                  <figure>
+                    <img src={slide.image.src} alt={slide.image.alt} loading="lazy" decoding="async" />
+                  </figure>
+                )}
+                <h1>{slide.title}</h1>
+                <p>{slide.message}</p>
+              </section>
+              <ol class="portfolio-timeline-list">
+                {slide.primaryItems.map((item) => (
+                  <li>
+                    <span>{item.label}</span>
+                    <strong>{item.title}</strong>
+                    <p>{item.description}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : slide.variant === 'skills' ? (
+            <div class="portfolio-skill-layout">
+              <div class="portfolio-skill-title">
+                <h1>{slide.title}</h1>
+                <p>{slide.message}</p>
+              </div>
+              <div class="portfolio-skill-grid">
+                {slide.primaryItems.map((item) => (
+                  <section>
+                    <span>{item.label}</span>
+                    <h2>{item.title}</h2>
+                    <p>{item.description}</p>
+                  </section>
+                ))}
+              </div>
+              {slide.secondaryItems && (
+                <aside class="portfolio-skill-note">
+                  {slide.secondaryItems.map((item) => (
+                    <p>
+                      <strong>{item.title}</strong>
+                      {item.description}
+                    </p>
+                  ))}
+                </aside>
+              )}
+            </div>
+          ) : slide.variant === 'proof' ? (
+            <div class="portfolio-project-layout">
+              <aside class="portfolio-project-rail">
+                <h1>{slide.projectRail?.title ?? slide.title}</h1>
+                <p>{slide.projectRail?.message ?? slide.message}</p>
+                <ul>
+                  {slide.projectRail?.period && (
+                    <li class="portfolio-project-period">
+                      <span>{language === 'ko' ? '기간' : 'Period'}</span>
+                      <strong>{slide.projectRail.period}</strong>
+                    </li>
+                  )}
+                  {(slide.projectRail?.items ?? slide.primaryItems).map((item) => (
+                    <li>
+                      <span>{item.label}</span>
+                      <strong>{item.title}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+              <div class="portfolio-project-main">
+                {slide.visualPlaceholder?.image ? (
+                  <figure class="portfolio-visual-placeholder portfolio-visual-placeholder--image">
+                    <img
+                      src={slide.visualPlaceholder.image.src}
+                      alt={slide.visualPlaceholder.image.alt}
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </figure>
+                ) : slide.visualPlaceholder ? (
+                  <figure class="portfolio-visual-placeholder">
+                    <span>{slide.visualPlaceholder.label}</span>
+                    <strong>{slide.visualPlaceholder.title}</strong>
+                    <p>{slide.visualPlaceholder.description}</p>
+                  </figure>
+                ) : slide.image ? (
+                  <figure class="portfolio-project-image">
+                    <img src={slide.image.src} alt={slide.image.alt} loading="lazy" decoding="async" />
+                  </figure>
+                ) : (
+                  <div class="portfolio-project-placeholder" aria-label={slide.eyebrow}>
+                    <span>{slide.eyebrow}</span>
+                    <strong>{slide.title}</strong>
+                    <p>{slide.primaryItems.map((item) => item.label).join(' · ')}</p>
+                  </div>
+                )}
+                <div class={`portfolio-project-achievements ${slide.primaryItems.length === 2 ? 'portfolio-project-achievements--two' : ''}`}>
+                  {slide.primaryItems.map((item) => (
+                    <section>
+                      <h2>{item.title}</h2>
+                      {item.scope && <span class="portfolio-project-scope">{item.scope}</span>}
+                      {item.description && <p>{item.description}</p>}
+                      {item.specs && (
+                        <dl class="portfolio-project-specs">
+                          {item.specs.map((spec) => (
+                            <div>
+                              <dt>{spec.label}</dt>
+                              <dd>{spec.value}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      )}
+                      {item.entries && (
+                        <ul class="portfolio-project-entries">
+                          {item.entries.map((entry) => <li>{entry}</li>)}
+                        </ul>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : slide.variant === 'process' ? (
+            <div class="portfolio-process-layout">
+              <aside class="portfolio-project-rail">
+                <h1>{slide.projectRail?.title ?? slide.title}</h1>
+                <p>{slide.projectRail?.message ?? slide.message}</p>
+                <ul>
+                  {slide.projectRail?.period && (
+                    <li class="portfolio-project-period">
+                      <span>{language === 'ko' ? '기간' : 'Period'}</span>
+                      <strong>{slide.projectRail.period}</strong>
+                    </li>
+                  )}
+                  {(slide.projectRail?.items ?? slide.primaryItems).map((item) => (
+                    <li>
+                      <span>{item.label}</span>
+                      <strong>{item.title}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+              <div class="portfolio-process-main">
+                <div class="portfolio-process-heading">
+                  <h1>{slide.title}</h1>
+                  {slide.message && <p>{slide.message}</p>}
+                </div>
+                {slide.visualPlaceholder?.image ? (
+                  <figure class="portfolio-visual-placeholder portfolio-visual-placeholder--image">
+                    <img
+                      src={slide.visualPlaceholder.image.src}
+                      alt={slide.visualPlaceholder.image.alt}
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </figure>
+                ) : slide.visualPlaceholder ? (
+                  <figure class="portfolio-visual-placeholder">
+                    <span>{slide.visualPlaceholder.label}</span>
+                    <strong>{slide.visualPlaceholder.title}</strong>
+                    <p>{slide.visualPlaceholder.description}</p>
+                  </figure>
+                ) : null}
+                <ol>
+                  {slide.primaryItems.map((item) => (
+                    <li>
+                      <div class="portfolio-process-item-heading">
+                        <span>{item.label}</span>
+                        <strong>{item.title}</strong>
+                      </div>
+                      {item.description && <p>{item.description}</p>}
+                      {item.entries && (
+                        <ul class="portfolio-process-item-entries">
+                          {item.entries.map((entry) => <li>{entry}</li>)}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          ) : (
+            <div class="portfolio-outcome-layout">
+              <aside class="portfolio-project-rail">
+                <h1>{slide.projectRail?.title ?? slide.title}</h1>
+                <p>{slide.projectRail?.message ?? slide.message}</p>
+                <ul>
+                  {slide.projectRail?.period && (
+                    <li class="portfolio-project-period">
+                      <span>{language === 'ko' ? '기간' : 'Period'}</span>
+                      <strong>{slide.projectRail.period}</strong>
+                    </li>
+                  )}
+                  {(slide.projectRail?.items ?? slide.primaryItems).map((item) => (
+                    <li>
+                      <span>{item.label}</span>
+                      <strong>{item.title}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+              <div class="portfolio-outcome-main">
+                <div class="portfolio-outcome-heading">
+                  <h1>{slide.title}</h1>
+                  <p>{slide.message}</p>
+                </div>
+                {slide.visualPlaceholder?.image ? (
+                  <figure class="portfolio-visual-placeholder portfolio-visual-placeholder--image">
+                    <img
+                      src={slide.visualPlaceholder.image.src}
+                      alt={slide.visualPlaceholder.image.alt}
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </figure>
+                ) : slide.visualPlaceholder && (
+                  <figure class="portfolio-visual-placeholder">
+                    <span>{slide.visualPlaceholder.label}</span>
+                    <strong>{slide.visualPlaceholder.title}</strong>
+                    <p>{slide.visualPlaceholder.description}</p>
+                  </figure>
+                )}
+                <div class="portfolio-outcome-grid">
+                  {slide.primaryItems.map((item) => (
+                    <section>
+                      <div class="portfolio-outcome-item-heading">
+                        <span>{item.label}</span>
+                        <h2>{item.title}</h2>
+                      </div>
+                      {item.entries ? (
+                        <ul class="portfolio-outcome-item-entries">
+                          {item.entries.map((entry) => <li>{entry}</li>)}
+                        </ul>
+                      ) : item.description && <p>{item.description}</p>}
+                    </section>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </article>
+      ))
+    }
+  </section>
+
+  <nav class="portfolio-side-index" data-portfolio-index data-print="hidden" aria-label="Portfolio pages">
+    {slides.map((slide, index) => (
+      <a
+        href={`#portfolio-slide-${index + 1}`}
+        data-portfolio-index-link
+        data-portfolio-index-target={index}
+        aria-label={`${String(index + 1).padStart(2, '0')} ${slide.eyebrow}`}
+      >
+        <span>{String(index + 1).padStart(2, '0')}</span>
+        <strong>{slide.eyebrow}</strong>
+      </a>
+    ))}
+  </nav>
+
+  <div class="resume-document-meta" data-print="hidden" aria-label={content.labels.documentInfo}>
+    <div class="resume-document-meta-row resume-document-meta-row--primary">
+      <p class="resume-document-meta-copyright">{copyrightNotice}</p>
+      {privateDocumentNote && <p class="resume-document-meta-note">{privateDocumentNote}</p>}
+    </div>
+    <div class="resume-document-meta-row resume-document-meta-row--secondary">
+      <div class="resume-document-meta-notices">
+        <details class="resume-document-meta-notice">
+          <summary>{content.labels.usageNotice}</summary>
+          <p>{content.meta.usageNotice}</p>
+        </details>
+        <span class="resume-document-meta-separator" aria-hidden="true">|</span>
+        <details class="resume-document-meta-notice">
+          <summary>{content.labels.analyticsNotice}</summary>
+          <p>{content.meta.analyticsNotice}</p>
+        </details>
+      </div>
+      <div class="resume-document-meta-controls">
+        <span>{content.labels.lastUpdated} {lastUpdated}</span>
+        <span aria-hidden="true">·</span>
+        {
+          (['ko', 'en'] as const).map((item, index) => (
+            <>
+              {index > 0 && <span aria-hidden="true">|</span>}
+              {
+                item === language ? (
+                  <span class="resume-language-current" aria-current="true">{item.toUpperCase()}</span>
+                ) : (
+                  <a
+                    class="resume-language-link"
+                    href={languageLinks[item]}
+                    hreflang={item}
+                    data-portfolio-language-link
+                    data-portfolio-track={track}
+                    data-portfolio-language={item}
+                  >
+                    {item.toUpperCase()}
+                  </a>
+                )
+              }
+            </>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  {
+    downloadPdf && (
+      <a
+        class="portfolio-floating-download"
+        href={downloadPdf}
+        download
+        data-print="hidden"
+        data-portfolio-download
+        data-portfolio-track={track}
+        data-portfolio-language={language}
+        aria-label={content.labels.downloadPdf}
+        title={content.labels.downloadPdf}
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="portfolio-floating-download-icon">
+          <path d="M12 4v11" />
+          <path d="m7.5 10.5 4.5 4.5 4.5-4.5" />
+          <path d="M6 19h12" />
+        </svg>
+        <span>PDF</span>
+      </a>
+    )
+  }
+</div>
+
+<script>
+  document.querySelectorAll('.resume-document-meta-notices').forEach((group) => {
+    group.querySelectorAll('details').forEach((details) => {
+      details.addEventListener('toggle', () => {
+        if (!details.open) return;
+
+        group.querySelectorAll('details').forEach((item) => {
+          if (item !== details) item.removeAttribute('open');
+        });
+
+        requestAnimationFrame(() => {
+          const target = details.querySelector('p') ?? details;
+          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          target.scrollIntoView({
+            block: 'end',
+            inline: 'nearest',
+            behavior: prefersReducedMotion ? 'auto' : 'smooth'
+          });
+        });
+      });
+    });
+  });
+
+  const portfolioSlides = Array.from(document.querySelectorAll<HTMLElement>('[data-portfolio-slide]'));
+  if (portfolioSlides.length > 0) {
+    const portfolioIndexLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-portfolio-index-link]'));
+
+    const setActivePortfolioIndex = (activeIndex: number) => {
+      portfolioIndexLinks.forEach((link, index) => {
+        const isActive = index === activeIndex;
+        if (isActive) {
+          link.setAttribute('aria-current', 'page');
+          return;
+        }
+
+        link.removeAttribute('aria-current');
+      });
+    };
+
+    const getCurrentSlideIndex = () => {
+      const viewportCenter = window.innerHeight / 2;
+
+      return portfolioSlides.reduce(
+        (closest, slide, index) => {
+          const rect = slide.getBoundingClientRect();
+          const distance = Math.abs(rect.top + rect.height / 2 - viewportCenter);
+          return distance < closest.distance ? { index, distance } : closest;
+        },
+        { index: 0, distance: Number.POSITIVE_INFINITY }
+      ).index;
+    };
+
+    setActivePortfolioIndex(getCurrentSlideIndex());
+
+    const portfolioIndexObserver = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (!visibleEntry) return;
+
+        const slideIndex = Number((visibleEntry.target as HTMLElement).dataset.portfolioSlideIndex || '0');
+        setActivePortfolioIndex(slideIndex);
+      },
+      {
+        root: null,
+        threshold: [0.35, 0.55, 0.75]
+      }
+    );
+
+    portfolioSlides.forEach((slide) => portfolioIndexObserver.observe(slide));
+
+    portfolioIndexLinks.forEach((link) => {
+      link.addEventListener('click', (event) => {
+        const targetIndex = Number(link.dataset.portfolioIndexTarget || '0');
+        const targetSlide = portfolioSlides[targetIndex];
+
+        if (!targetSlide) return;
+
+        event.preventDefault();
+        targetSlide.scrollIntoView({
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          block: 'start'
+        });
+        setActivePortfolioIndex(targetIndex);
+      });
+    });
+
+    const desktopScrollQuery = window.matchMedia('(min-width: 901px) and (min-height: 900px)');
+    let isWheelGestureLocked = false;
+    let wheelGestureReleaseTimer: number | undefined;
+
+    const releaseWheelGesture = () => {
+      window.clearTimeout(wheelGestureReleaseTimer);
+      isWheelGestureLocked = false;
+    };
+
+    const scheduleWheelGestureRelease = () => {
+      window.clearTimeout(wheelGestureReleaseTimer);
+      wheelGestureReleaseTimer = window.setTimeout(releaseWheelGesture, 120);
+    };
+
+    window.addEventListener(
+      'wheel',
+      (event) => {
+        if (!desktopScrollQuery.matches || event.ctrlKey || Math.abs(event.deltaY) < Math.abs(event.deltaX)) {
+          return;
+        }
+
+        const direction = Math.sign(event.deltaY);
+        if (direction === 0) return;
+
+        const currentIndex = getCurrentSlideIndex();
+        const nextIndex = Math.min(Math.max(currentIndex + direction, 0), portfolioSlides.length - 1);
+
+        if (nextIndex === currentIndex) {
+          releaseWheelGesture();
+          return;
+        }
+
+        if (isWheelGestureLocked) {
+          event.preventDefault();
+          scheduleWheelGestureRelease();
+          return;
+        }
+
+        event.preventDefault();
+        isWheelGestureLocked = true;
+
+        portfolioSlides[nextIndex].scrollIntoView({
+          block: 'start',
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+        });
+        setActivePortfolioIndex(nextIndex);
+        scheduleWheelGestureRelease();
+      },
+      { passive: false }
+    );
+  }
+</script>

@@ -2,20 +2,15 @@ export const siteMeta = {
   title: 'Portfolio',
   brand: '당현아 포트폴리오',
   subtitle: '독립 포트폴리오 사이트',
-  tagline: '문제 정의와 해결 과정을 보여주는 프로젝트 아카이브',
+  tagline: '목적별로 바로 확인할 수 있는 포트폴리오',
   description:
-    '대표 프로젝트와 핵심 결과를 빠르게 훑어볼 수 있도록 정리한 당현아의 싱글 페이지 포트폴리오 사이트입니다.',
+    '지원 목적에 맞는 핵심 경험과 결과를 빠르게 확인할 수 있도록 정리한 당현아의 포트폴리오 사이트입니다.',
   siteUrl: 'https://hadevyi.github.io/portfolio/',
   rootPath: '/portfolio/',
   repoUrl: 'https://github.com/hadevyi/portfolio'
 } as const;
 
 export const mainNav = [
-  {
-    href: '/portfolio/',
-    label: '홈',
-    description: '포트폴리오 메인 페이지'
-  },
   {
     href: 'https://hadevyi.github.io/',
     label: '공식 홈페이지',
