@@ -9,6 +9,9 @@ export default defineConfig({
   site: 'https://hadevyi.github.io',
   base: '/portfolio',
   output: 'static',
+  devToolbar: {
+    enabled: false
+  },
   vite: {
     plugins: [tailwindcss()]
   },
