@@ -10,7 +10,8 @@ const outputDir = path.join(projectRoot, 'output', 'pdf');
 const downloadsDir = path.join(projectRoot, 'public', 'downloads');
 const baseUrl = process.env.PORTFOLIO_BASE_URL ?? 'http://127.0.0.1:4321/portfolio';
 const downloadsManifestPath = path.join(projectRoot, 'src', 'data', 'portfolioDownloads.json');
-const documents = JSON.parse(await readFile(downloadsManifestPath, 'utf8'));
+const documents = JSON.parse(await readFile(downloadsManifestPath, 'utf8'))
+  .filter((document) => !process.env.PORTFOLIO_TRACK || document.track === process.env.PORTFOLIO_TRACK);
 
 const chromeCandidates = [
   process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
@@ -60,6 +61,13 @@ try {
     const downloadPath = path.join(downloadsDir, document.fileName);
 
     await page.goto(url, { waitUntil: 'networkidle' });
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await Promise.all(Array.from(document.images, async (image) => {
+        image.loading = 'eager';
+        await image.decode();
+      }));
+    });
     await page.evaluate((title) => {
       document.title = title;
     }, document.title);
