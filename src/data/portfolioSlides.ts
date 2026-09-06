@@ -2,12 +2,19 @@ import type { PortfolioLanguage, PortfolioTrack } from './portfolio';
 
 export type PortfolioSlideVariant =
   | 'cover'
+  | 'activity-overview'
+  | 'representative-career'
+  | 'teaching-areas'
   | 'career-map'
   | 'career'
   | 'timeline'
   | 'skills'
   | 'proof'
   | 'process'
+  | 'teaching-cycle'
+  | 'teaching-case'
+  | 'feedback'
+  | 'teaching-principles'
   | 'outcome'
   | 'achievement'
   | 'ai-practice'
@@ -20,6 +27,7 @@ export interface PortfolioSlideItem {
   meta?: string;
   employmentType?: string;
   role?: string;
+  period?: string;
   work?: string;
   outcome?: string;
   scope?: string;
@@ -44,6 +52,7 @@ export interface PortfolioSlideItem {
 export interface PortfolioProjectRail {
   title: string;
   period: string;
+  periodLabel?: string;
   message: string;
   items: readonly Pick<PortfolioSlideItem, 'label' | 'title'>[];
 }
@@ -58,18 +67,41 @@ export interface PortfolioVisualPlaceholder {
   };
 }
 
+export interface PortfolioSupportingImage {
+  src: string;
+  alt: string;
+  caption?: string;
+  crop?: 'service-1' | 'service-2' | 'personal-2';
+}
+
 export interface PortfolioSlide {
   eyebrow: string;
   title: string;
   message: string;
   variant: PortfolioSlideVariant;
+  summaryLabel?: string;
+  careerStats?: readonly {
+    label: string;
+    value: string;
+    description?: string;
+  }[];
+  careerFormats?: readonly {
+    label: string;
+    description: string;
+  }[];
   decisionFlow?: readonly {
     title: string;
     description: string;
   }[];
+  foundation?: {
+    label: string;
+    value: string;
+  };
+  phaseLabels?: readonly [string, string];
   compactProjectLayout?: boolean;
   projectRail?: PortfolioProjectRail;
   visualPlaceholder?: PortfolioVisualPlaceholder;
+  supportingImages?: readonly PortfolioSupportingImage[];
   image?: {
     src: string;
     alt: string;
@@ -79,18 +111,497 @@ export interface PortfolioSlide {
   tags?: readonly string[];
 }
 
-const createPlanningSlides = (language: PortfolioLanguage, start = 1, count = 9): PortfolioSlide[] =>
-  Array.from({ length: count }, (_, index) => {
-    const pageNumber = String(index + start).padStart(2, '0');
+const instructorSlides = (language: PortfolioLanguage): PortfolioSlide[] => {
+  if (language === 'ko') {
+    return [
+      {
+        eyebrow: '표지',
+        title: '개발·교육·사업을 연결해온 백엔드 강사',
+        message: '현업 개발과 원투원프로그래밍 1인 사업을 바탕으로,\n학습자의 개념·구현·결과물 연결을 코칭했습니다.',
+        variant: 'cover',
+        image: { src: '/portfolio/images/portfolio-evidence/instructor-profile.png', alt: '강사 당현아 프로필 이미지' },
+        primaryItems: [
+          { label: '분야', title: '백엔드 · 프로젝트 코칭', description: '백엔드 학습과 프로젝트 수행 흐름 코칭' },
+          { label: '경험', title: '현업 백엔드 개발', description: '현업 서버 개발과 운영 경험 기반 설명' },
+          { label: '멘토링', title: '이력서 · 포트폴리오', description: '프로젝트 경험을 문서와 산출물로 정리하도록 피드백' }
+        ],
+        tags: ['백엔드 강의', '자료구조·알고리즘', '1:1 프로그래밍', '프로젝트 실습 코칭', 'Git 협업·PR 리뷰', '커리어 문서 멘토링']
+      },
+      {
+        eyebrow: '강사 경력',
+        title: '대표 강사 경력',
+        message: '전체 활동 규모를 먼저 보고, 아래 대표 경력에서 기관·역할·대상을 확인할 수 있습니다.',
+        variant: 'representative-career',
+        careerStats: [
+          { label: '교육 활동 누적', value: '약 6년', description: '겹치는 기간과 공백을 제외한 실제 활동 기준' },
+          { label: '공개 교육·멘토링 기록', value: '14건', description: '공개된 교육·멘토링 경험 기록 기준' },
+          { label: '교육 방식', value: '6종', description: '활동 형태별 진행 방식 기준' }
+        ],
+        careerFormats: [
+          { label: '1:1', description: '학습 목표와 수준에 맞춘 개인 맞춤형 수업' },
+          { label: '프로젝트', description: '팀 단위 구현과 협업을 함께 다루는 실습' },
+          { label: '강의', description: '실시간·녹화 기반의 개념·코드 실습 강의' },
+          { label: '특강', description: '하나의 주제를 압축해 전달하는 단기 집중 세션' },
+          { label: '멘토링', description: '성장과 진로를 함께 정리하는 지속적인 대화' },
+          { label: '코칭', description: '진행 상황을 점검하고 결과물 완성을 돕는 피드백' }
+        ],
+        primaryItems: [
+          {
+            label: '01',
+            title: 'ICT콤플렉스 전문가 멘토',
+            description: 'ICT CoC 전문가 멘토풀 | 공공 멘토링',
+            period: '2025.09–2027.08',
+            employmentType: '전문가 멘토',
+            role: 'SW개발 · 개발자 취업 코칭',
+            scope: '개발자 · 예비·기창업자 · 학생'
+          },
+          {
+            label: '02',
+            title: '제로베이스 백엔드 파트 강사',
+            description: '데이원컴퍼니(제로베이스) | 백엔드 스쿨',
+            period: '2025.03–2028.02',
+            employmentType: '파트 강사',
+            role: '자료구조 · 알고리즘 강의',
+            scope: '약 12강 · Java 예제 · 문제 풀이'
+          },
+          {
+            label: '03',
+            title: 'SSAFY 프로젝트 실습코치',
+            description: '멀티캠퍼스·삼성청년SW아카데미 | 6·7기',
+            period: '2021.12–2022.11',
+            employmentType: '계약 프리랜서',
+            role: '공통·SSDC·자율 프로젝트 지원',
+            scope: '66개 팀 · 6회 · 라이브 약 15회'
+          },
+          {
+            label: '04',
+            title: '원투원프로그래밍',
+            description: '개인 사업 | 온라인 1:1 프로그래밍 교육',
+            period: '2020.04–2020.10',
+            employmentType: '개인사업 대표',
+            role: '교육 운영 · 커리큘럼 설계 · 강의',
+            scope: '상담 · 체험강의 · 수업 · 과제·피드백'
+          }
+        ],
+        secondaryItems: [
+          { label: '특강', title: '동양미래대학교 다솜', description: '현직자 특강 · 나의 커리어 디자인하기' },
+          { label: '공개 강좌', title: 'SW중심대학', description: '개발자 성장과 학습 방법 7강 기획·강의·제작' },
+          { label: '멘토링', title: '인제대학교 SW중심대학사업단', description: '프로젝트·이력서·포트폴리오·Git 협업 피드백' }
+        ]
+      },
+      {
+        eyebrow: '교육 영역',
+        title: '강의와 코칭에서 다루는 주제',
+        message: '개인 수업, 강의, 프로젝트 코칭, 멘토링에서 반복해온 교육 내용을 정리했습니다.',
+        variant: 'teaching-areas',
+        primaryItems: [
+          {
+            label: '01',
+            title: '기초 프로그래밍',
+            description: '개인별 목표와 현재 수준에 맞춰 문법과 문제 해결의 기본기를 다룹니다.',
+            entries: ['학습 목표와 현재 수준에 맞춰 수업 범위 설정', '문법·문제 해결을 과제와 피드백으로 반복']
+          },
+          {
+            label: '02',
+            title: '자료구조·알고리즘',
+            description: '자료구조의 선택 이유를 Java 구현과 문제 풀이로 연결합니다.',
+            entries: ['판서로 자료구조의 특징과 선택 기준 설명', '샘플 코드와 예제로 구현·풀이 과정 점검']
+          },
+          {
+            label: '03',
+            title: '팀 프로젝트·협업',
+            description: '팀이 기능을 완성하고 협업 과정과 결과를 발표할 수 있도록 지원합니다.',
+            entries: ['요구사항을 기능 단위와 산출물로 정리', 'Git 협업·배포·발표 흐름을 단계별로 피드백']
+          },
+          {
+            label: '04',
+            title: '프로젝트 기록·커리어 문서',
+            description: '프로젝트 경험을 지원 문서에서 설명 가능한 기록으로 정리하도록 돕습니다.',
+            entries: ['직무 목표에 맞춰 이력서·포트폴리오 구조화', 'Git 기록과 피드백 반영 과정을 점검']
+          }
+        ]
+      },
+      {
+        eyebrow: '교육 흐름',
+        title: '강의 설계와 운영 사이클',
+        message: '제안부터 후기 반영까지, 학습자와 목표를 기준으로 수업을 설계·운영·개선합니다.',
+        variant: 'teaching-cycle',
+        foundation: {
+          label: '상시 준비',
+          value: '관심 주제 학습 · 예제·실습 자료화'
+        },
+        phaseLabels: ['설계', '운영·개선'],
+        primaryItems: [
+          { label: '01', title: '강의 제안·요청 확인', description: '주제, 기간, 운영 조건을 확인합니다.' },
+          { label: '02', title: '대상·학습 목표 설정', description: '학습자 수준과 수업 후 결과를 정합니다.' },
+          { label: '03', title: '사전 조사 (필요 시)', description: '수요와 질문을 확인해 사례와 난이도를 조정합니다.' },
+          { label: '04', title: '강의안·실습 자료 준비', description: '예제, 실습, 과제와 보조 자료를 구성합니다.' },
+          { label: '05', title: '강의 운영', description: '설명·실습·질의응답으로 이해도를 확인합니다.' },
+          { label: '06', title: '후기 수집·다음 강의 보완', description: '후기를 정리해 자료와 운영 방식을 개선합니다.' }
+        ]
+      },
+      {
+        eyebrow: '대표 사례 01',
+        title: '백엔드 개념을 구현으로 연결하는 강의',
+        message: '제로베이스 백엔드 스쿨 녹화 강의에서 자료구조와 기초 알고리즘을 Java 구현과 문제 풀이로 설명합니다.',
+        variant: 'teaching-case',
+        compactProjectLayout: true,
+        projectRail: {
+          title: '제로베이스 백엔드 스쿨',
+          period: '2025.03–진행 중',
+          message: '개념 이해를 코드 작성과 문제 해결 과정으로 연결하는 백엔드 녹화 강의입니다.',
+          items: [
+            { label: '대상', title: '백엔드 학습자' },
+            { label: '범위', title: '자료구조 · 기초 알고리즘' },
+            { label: '역할', title: '파트 강사 · 녹화' }
+          ]
+        },
+        supportingImages: [
+          {
+            src: '/portfolio/images/portfolio-evidence/zerobase-mentor-network.jpeg',
+            alt: '제로베이스 백엔드 스쿨 현직자 강사진 및 취업 연계 자료',
+            caption: '현직자 강사진으로 참여한 백엔드 취업 스쿨'
+          },
+          {
+            src: '/portfolio/images/portfolio-evidence/zerobase-lecture-materials.jpeg',
+            alt: '제로베이스 백엔드 스쿨 강의 자료와 커리큘럼',
+            caption: '자료구조·기초 알고리즘을 직접 판서한 강의 자료'
+          }
+        ],
+        primaryItems: [
+          { label: '01', title: '자료구조와 기초 알고리즘을 단계별 구성', entries: ['환경 설정부터 핵심 개념까지 학습 순서 구성', '직접 작성한 판서와 Java 예제로 녹화 강의 제작'] },
+          { label: '02', title: '문제 풀이로 구현 감각 연결', entries: ['문제의 입력·상태·출력 흐름 설명', '풀이 과정과 복잡도를 비교하며 적용 기준 정리'] }
+        ]
+      },
+      {
+        eyebrow: '대표 사례 02',
+        title: '공개 콘텐츠로 확장한 온라인 강좌',
+        message: 'SW중심대학 온라인 공개 강좌를 기획·강의·제작하며 개발자 성장과 학습 방법을 공개 콘텐츠로 정리했습니다.',
+        variant: 'teaching-case',
+        compactProjectLayout: true,
+        projectRail: {
+          title: 'SW중심대학 온라인 공개 강좌',
+          periodLabel: '구성',
+          period: '7강 공개 강좌',
+          message: '개발자 성장과 학습 방법을 학습자가 스스로 따라갈 수 있는 온라인 강좌로 제작했습니다.',
+          items: [
+            { label: '대상', title: '개발자·학습자' },
+            { label: '범위', title: '성장 · 학습 방법' },
+            { label: '역할', title: '기획 · 강의 · 제작' }
+          ]
+        },
+        supportingImages: [
+          {
+            src: '/portfolio/images/portfolio-evidence/sw-centered-course-list.jpeg',
+            alt: 'SW중심대학 온라인 공개 강좌 목록',
+            caption: '개발자 성장과 학습 방법을 다룬 7개 강좌 구성'
+          },
+          {
+            src: '/portfolio/images/portfolio-evidence/sw-centered-youtube-playlist.jpeg',
+            alt: 'SW중심대학 온라인 공개 강좌 유튜브 재생목록',
+            caption: '공개 채널에서 운영한 7강 재생목록과 강의 시간'
+          }
+        ],
+        primaryItems: [
+          { label: '01', title: '7강으로 설계한 개발자 성장 로드맵', entries: ['코딩의 역할·코드 관리·시간 관리·트러블슈팅 등 성장 주제를 순서화', '각 차시를 독립 수강 가능한 30~40분대 영상으로 구성'] },
+          { label: '02', title: '공개 채널에 맞춘 강의 제작', entries: ['강의별 제목·썸네일·재생목록을 통일해 탐색과 복습 흐름 제공', '기획·강의·영상 제작을 맡아 7강 공개 콘텐츠 완성'] }
+        ]
+      },
+      {
+        eyebrow: '대표 사례 03',
+        title: '개인 목표에 맞춘 1:1 교육 서비스 설계',
+        message: '원투원프로그래밍에서 상담부터 체험 강의, 수업, 과제와 피드백까지의 교육 경험을 직접 설계했습니다.',
+        variant: 'teaching-case',
+        compactProjectLayout: true,
+        projectRail: {
+          title: '원투원프로그래밍',
+          period: '2020.04–2020.10',
+          message: '학습 목표와 현재 수준을 기준으로 수업을 설계한 온라인 1:1 프로그래밍 교육입니다.',
+          items: [
+            { label: '대상', title: '개인 학습자' },
+            { label: '운영 범위', title: '상담 · 체험 · 수업 · 과제 · 피드백' },
+            { label: '역할', title: '대표 · 강사' }
+          ]
+        },
+        supportingImages: [
+          {
+            src: '/portfolio/images/portfolio-evidence/one-to-one-consultation-form.png',
+            alt: '원투원 프로그래밍 과외 계획서',
+            caption: '상담 내용을 기준으로 수업 범위와 계획을 확정'
+          },
+          {
+            src: '/portfolio/images/portfolio-evidence/one-to-one-lecture-materials.png',
+            alt: '원투원 프로그래밍 강의 자료 모음',
+            caption: '기초 문법부터 예제까지 미리 제작한 강의 자료'
+          }
+        ],
+        primaryItems: [
+          { label: '01', title: '상담부터 수업까지의 학습 경로', entries: ['상담으로 목표와 제약 조건 확인', '체험 강의 후 수업 범위와 속도 조정'] },
+          { label: '02', title: '개별 과제와 피드백 운영', entries: ['수업 후 구현 과제와 보조 자료 제공', '질문과 결과를 다음 수업에 반영'] }
+        ]
+      },
+      {
+        eyebrow: '수강생 후기',
+        title: '강의 이후에 남은 변화',
+        message: '김과외·숨고에서 받은 강의 후기와 이후의 개발 교류를 통해 수업 준비, 맞춤형 진행, 학습의 지속을 확인했습니다.',
+        variant: 'feedback',
+        supportingImages: [
+          {
+            src: '/portfolio/images/portfolio-evidence/one-to-one-service-reviews.png',
+            alt: '수업 준비와 반복 설명을 언급한 김과외 및 숨고 강의 후기',
+            caption: '김과외 · 숨고 강의 후기',
+            crop: 'service-1'
+          },
+          {
+            src: '/portfolio/images/portfolio-evidence/one-to-one-service-reviews.png',
+            alt: '맞춤형 진도와 적절한 난이도를 언급한 김과외 및 숨고 강의 후기',
+            caption: '맞춤형 진도와 학습 자료',
+            crop: 'service-2'
+          },
+          {
+            src: '/portfolio/images/portfolio-evidence/one-to-one-personal-reviews.png',
+            alt: '강의 수강 이후 이어진 개발 관련 연락',
+            caption: '수강 이후 이어진 개발 관련 연락',
+            crop: 'personal-2'
+          }
+        ],
+        primaryItems: [
+          { label: '강의 후기 01', title: '준비된 설명과 반복 확인', description: '수업 전 준비와 이해되지 않는 부분을 반복해서 설명한 경험이 후기에서 확인됩니다.' },
+          { label: '강의 후기 02', title: '학습자에 맞춘 진도와 자료', description: '개인의 수준에 맞춘 진도, 적절한 난이도의 문제와 보조 자료가 언급되었습니다.' },
+          { label: '개발 교류', title: '수강 이후 이어진 개발 교류', description: '수강을 마친 뒤에도 개발 학습과 진로에 관한 연락을 꾸준히 이어가고 있습니다.' }
+        ]
+      },
+      {
+        eyebrow: '강의 기준',
+        title: '현직 개발을 교육으로 이어가는 이유',
+        message: '설명하는 과정에서 개발 지식과 판단 기준을 다시 정리합니다. 직접 경험하고 충분히 구조화해 명확히 전달할 수 있는 주제만 강의합니다.',
+        variant: 'teaching-principles',
+        foundation: {
+          label: '핵심 목표',
+          value: '자신에게 맞는 학습·커리어 방향을 정하고 스스로 다음 단계로 나아가도록 돕습니다.'
+        },
+        primaryItems: [
+          { label: '강의 주제', title: '경험하고 정리한 주제만', description: '요청에 맞춰 새롭게 익힌 내용보다 현업과 학습 과정에서 직접 경험하고 충분히 정리한 주제를 전달합니다.' },
+          { label: '교육 목표', title: '경험은 정답이 아닌 참고 기준', description: '제 시행착오와 선택 기준을 바탕으로 학습자가 자신에게 맞는 학습 방법과 커리어 방향을 찾도록 돕습니다.' },
+          { label: '교육 나눔', title: '교육 기회가 적은 곳을 우선', description: '비영리기관·학교·학생의 요청에 가능한 범위에서 참여하며, 일정이 겹치면 정보 접근성이 낮은 학습자를 우선합니다.' }
+        ],
+        secondaryItems: [
+          {
+            label: '제안 안내',
+            title: '기술 강의 · 커리어 특강 · 멘토링',
+            description: '현재 제공하는 주제 범위 안에서 제안을 받으며, 비영리기관·학교·학생을 위한 교육 나눔 문의도 환영합니다.'
+          }
+        ]
+      }
+    ];
+  }
 
-    return {
-      eyebrow: language === 'ko' ? `페이지 ${pageNumber}` : `Page ${pageNumber}`,
-      title: '',
-      message: '',
-      variant: 'placeholder',
-      primaryItems: []
-    };
-  });
+  return [
+    {
+      eyebrow: 'Cover',
+      title: 'A backend instructor connecting development, education, and business',
+      message: 'I combine hands-on development and the One-to-One Programming business,\nthen coach learners from concepts to implementation and outcomes.',
+      variant: 'cover',
+      image: { src: '/portfolio/images/portfolio-evidence/instructor-profile.png', alt: 'Instructor profile image of Dang Hyeona' },
+      primaryItems: [
+        { label: 'Area', title: 'Backend · Project Coaching', description: 'Coaching backend learning and project execution flow' },
+        { label: 'Experience', title: 'Production Backend', description: 'Explaining from hands-on server development and operations experience' },
+        { label: 'Mentoring', title: 'Resume · Portfolio', description: 'Reviewing project experience into documents and artifacts' }
+      ],
+      tags: ['Backend teaching', 'Data structures & algorithms', '1:1 programming', 'Project practice coaching', 'Git collaboration & PR review', 'Career document mentoring']
+    },
+      {
+      eyebrow: 'Instructor Experience',
+        title: 'Representative Instructor Experience',
+        message: 'Review the overall activity scale first, then the representative roles, organizations, and audiences below.',
+        variant: 'representative-career',
+        careerStats: [
+          { label: 'Teaching activity', value: 'About 6 years', description: 'Based on active periods, excluding gaps and overlaps' },
+          { label: 'Public teaching · mentoring records', value: '14', description: 'Publicly documented teaching and mentoring activities' },
+          { label: 'Teaching formats', value: '6', description: 'Distinct delivery formats' }
+        ],
+        careerFormats: [
+          { label: '1:1', description: 'Personalized sessions based on each learner’s goals and level' },
+          { label: 'Projects', description: 'Hands-on work covering team implementation and collaboration' },
+          { label: 'Lectures', description: 'Live and recorded lectures combining concepts and code practice' },
+          { label: 'Talks', description: 'Short, focused sessions that distill a single topic' },
+          { label: 'Mentoring', description: 'Ongoing conversations about growth and career direction' },
+          { label: 'Coaching', description: 'Feedback that guides progress toward a complete outcome' }
+        ],
+      primaryItems: [
+        { label: '01', title: 'ICT CoC Expert Mentor', description: 'ICT CoC expert mentor pool | Public mentoring', period: '2025.09–2027.08', employmentType: 'Expert mentor', role: 'Software development · Developer career coaching', scope: 'Developers · Aspiring/founding teams · Students' },
+        { label: '02', title: 'ZeroBase Backend Part Instructor', description: 'Day1Company (ZeroBase) | Backend School', period: '2025.03–2028.02', employmentType: 'Part instructor', role: 'Data structures · Algorithms lectures', scope: 'Approx. 12 lectures · Java examples · Problem solving' },
+        { label: '03', title: 'SSAFY Project Practice Coach', description: 'Multicampus · Samsung SW Academy for Youth | Cohorts 6–7', period: '2021.12–2022.11', employmentType: 'Contract freelancer', role: 'Common · SSDC · Autonomous project support', scope: '66 teams · 6 cycles · About 15 live sessions' },
+        { label: '04', title: 'One-to-One Programming', description: 'Personal business | Online 1:1 programming education', period: '2020.04–2020.10', employmentType: 'Business owner', role: 'Education operations · Curriculum · Lectures', scope: 'Consultation · Trial lesson · Classes · Assignments/feedback' }
+      ],
+      secondaryItems: [
+        { label: 'Special lecture', title: 'Dongyang Mirae University Dasom', description: 'Practitioner lecture · Designing my career' },
+        { label: 'Open course', title: 'SW-Centered University', description: 'Planned, taught, and produced a 7-part developer growth course' },
+        { label: 'Mentoring', title: 'Inje University SW-Centered University', description: 'Project · resume · portfolio · Git collaboration feedback' }
+      ]
+      },
+    {
+      eyebrow: 'Teaching Areas',
+      title: 'Topics across my teaching and coaching',
+      message: 'This page summarizes recurring teaching topics from 1:1 instruction, lectures, project coaching, and mentoring.',
+      variant: 'teaching-areas',
+      primaryItems: [
+        {
+          label: '01',
+          title: 'Programming fundamentals',
+          description: 'Cover syntax and problem-solving fundamentals at each learner’s goal and current level.',
+          entries: ['Set the lesson scope around the learner’s goal and current level', 'Reinforce syntax and problem solving through assignments and feedback']
+        },
+        {
+          label: '02',
+          title: 'Data structures and algorithms',
+          description: 'Connect data-structure choices with Java implementations and problem solving.',
+          entries: ['Explain structure characteristics and selection criteria on a whiteboard', 'Review implementation and solution flow with code examples']
+        },
+        {
+          label: '03',
+          title: 'Team projects and collaboration',
+          description: 'Help teams complete features, collaborate effectively, and present their outcomes.',
+          entries: ['Organize requirements into feature units and project artifacts', 'Give step-by-step feedback on Git, deployment, and presentations']
+        },
+        {
+          label: '04',
+          title: 'Project records and career documents',
+          description: 'Help learners turn project experience into records they can explain in application materials.',
+          entries: ['Structure resumes and portfolios around career goals', 'Review Git records and how feedback was applied']
+        }
+      ]
+    },
+      {
+      eyebrow: 'Teaching Cycle',
+      title: 'How I design and run a course',
+      message: 'From the initial request to feedback, I design, run, and improve each course around learners and outcomes.',
+      variant: 'teaching-cycle',
+      foundation: {
+        label: 'Ongoing preparation',
+        value: 'Independent study · reusable examples and practice materials'
+      },
+      phaseLabels: ['Design', 'Delivery and improvement'],
+      primaryItems: [
+        { label: '01', title: 'Confirm the request', description: 'Confirm the topic, schedule, and delivery constraints.' },
+        { label: '02', title: 'Set audience and outcomes', description: 'Define learner level and the expected result.' },
+        { label: '03', title: 'Survey learners when needed', description: 'Use questions and demand to calibrate examples and difficulty.' },
+        { label: '04', title: 'Prepare materials and practice', description: 'Build examples, exercises, assignments, and supporting material.' },
+        { label: '05', title: 'Run the course', description: 'Check understanding through explanation, practice, and Q&A.' },
+        { label: '06', title: 'Collect feedback and improve', description: 'Use feedback to refine materials and the next course.' }
+      ]
+      },
+    {
+      eyebrow: 'Case 01',
+      title: 'Connecting backend concepts to implementation',
+      message: 'At ZeroBase Backend School, I teach data structures and foundational algorithms through recorded Java lessons and problem solving.',
+      variant: 'teaching-case',
+      compactProjectLayout: true,
+      projectRail: { title: 'ZeroBase Backend School', period: '2025.03–Ongoing', message: 'A recorded backend course that connects conceptual understanding with coding and problem-solving processes.', items: [{ label: 'Audience', title: 'Backend learners' }, { label: 'Scope', title: 'Data structures · Foundational algorithms' }, { label: 'Role', title: 'Part instructor · Recorded' }] },
+      supportingImages: [
+        {
+          src: '/portfolio/images/portfolio-evidence/zerobase-mentor-network.jpeg',
+          alt: 'ZeroBase Backend School industry mentor and employment network material',
+          caption: 'Participation as an industry instructor in a backend employment school'
+        },
+        {
+          src: '/portfolio/images/portfolio-evidence/zerobase-lecture-materials.jpeg',
+          alt: 'ZeroBase Backend School lecture materials and curriculum',
+          caption: 'Lecture materials with handwritten data structures and algorithm notes'
+        }
+      ],
+      primaryItems: [
+        { label: '01', title: 'Structure data structures and algorithms step by step', entries: ['Organize the learning sequence from setup to core concepts', 'Build recorded lessons with handwritten notes and Java examples'] },
+        { label: '02', title: 'Connect problem solving to implementation', entries: ['Explain the input, state, and output flow of each problem', 'Compare solution flow and complexity to clarify when to apply it'] }
+      ]
+    },
+    {
+      eyebrow: 'Case 02',
+      title: 'An online course expanded through public content',
+      message: 'I planned, taught, and produced an SW-Centered University open course on developer growth and learning methods.',
+      variant: 'teaching-case',
+      compactProjectLayout: true,
+      projectRail: { title: 'SW-Centered University Open Course', periodLabel: 'Format', period: '7-part open course', message: 'A self-paced online course that organizes developer growth and learning methods into a repeatable learning flow.', items: [{ label: 'Audience', title: 'Developers · Learners' }, { label: 'Scope', title: 'Growth · Learning methods' }, { label: 'Role', title: 'Planning · Teaching · Production' }] },
+      supportingImages: [
+        { src: '/portfolio/images/portfolio-evidence/sw-centered-course-list.jpeg', alt: 'SW-Centered University open course list', caption: 'Seven lessons on developer growth and learning methods' },
+        { src: '/portfolio/images/portfolio-evidence/sw-centered-youtube-playlist.jpeg', alt: 'SW-Centered University open course YouTube playlist', caption: 'A public seven-part playlist with lesson runtimes' }
+      ],
+      primaryItems: [
+        { label: '01', title: 'A seven-part roadmap for developer growth', entries: ['Sequence topics from coding and code management to time management and troubleshooting', 'Structure each lesson as an independently viewable 30 to 40-minute video'] },
+        { label: '02', title: 'Produce for a public learning channel', entries: ['Standardize lesson titles, thumbnails, and playlist order for browsing and review', 'Own planning, teaching, and video production across seven public lessons'] }
+      ]
+    },
+    {
+      eyebrow: 'Case 03',
+      title: 'Designing a goal-aligned 1:1 education service',
+      message: 'At One-to-One Programming, I designed the education experience from consultation and trial lessons to classes, assignments, and feedback.',
+      variant: 'teaching-case',
+      compactProjectLayout: true,
+      projectRail: { title: 'One-to-One Programming', period: '2020.04–2020.10', message: 'An online 1:1 programming education service designed around learning goals and current skill level.', items: [{ label: 'Audience', title: 'Individual learners' }, { label: 'Scope', title: 'Consultation · Trial · Classes · Assignments · Feedback' }, { label: 'Role', title: 'Founder · Instructor' }] },
+      supportingImages: [
+        { src: '/portfolio/images/portfolio-evidence/one-to-one-consultation-form.png', alt: 'One-to-One Programming lesson plan', caption: 'Confirming scope and plan from the consultation' },
+        { src: '/portfolio/images/portfolio-evidence/one-to-one-lecture-materials.png', alt: 'One-to-One Programming lecture materials', caption: 'Prepared materials from fundamentals to examples' }
+      ],
+      primaryItems: [
+        { label: '01', title: 'A learning path from consultation to class', entries: ['Confirm goals and constraints through consultation', 'Adjust scope and pace after the trial lesson'] },
+        { label: '02', title: 'Individual assignments and feedback', entries: ['Provide implementation assignments and supporting material', 'Reflect questions and outcomes in the next class'] }
+      ]
+    },
+    {
+      eyebrow: 'Course Reviews',
+      title: 'Changes that remain after learning',
+      message: 'Course reviews from KimGwaoe and Soomgo, together with later developer conversations, show prepared instruction, individualized pacing, and continued learning.',
+      variant: 'feedback',
+      supportingImages: [
+        {
+          src: '/portfolio/images/portfolio-evidence/one-to-one-service-reviews.png',
+          alt: 'KimGwaoe and Soomgo reviews mentioning lesson preparation and repeated explanations',
+          caption: 'KimGwaoe · Soomgo learner reviews',
+          crop: 'service-1'
+        },
+        {
+          src: '/portfolio/images/portfolio-evidence/one-to-one-service-reviews.png',
+          alt: 'A KimGwaoe and Soomgo course review mentioning individualized pacing and suitable difficulty',
+          caption: 'Individualized pacing and materials',
+          crop: 'service-2'
+        },
+        {
+          src: '/portfolio/images/portfolio-evidence/one-to-one-personal-reviews.png',
+          alt: 'Ongoing conversations about development after completing a course',
+          caption: 'Development conversations after the course',
+          crop: 'personal-2'
+        }
+      ],
+      primaryItems: [
+        { label: 'Course review 01', title: 'Prepared explanations and repeated checks', description: 'The review confirms lesson preparation and repeated explanations for points that were not yet understood.' },
+        { label: 'Course review 02', title: 'Pacing and materials tailored to the learner', description: 'The review mentions individualized pacing, appropriately difficult problems, and supporting materials.' },
+        { label: 'Developer connection', title: 'Development conversations after the course', description: 'I continue to exchange messages about development learning and career direction after the course.' }
+      ]
+    },
+    {
+      eyebrow: 'Teaching Principles',
+      title: 'Why I continue teaching alongside development',
+      message: 'Teaching helps me reorganize my technical knowledge and decision criteria. I teach only topics I have directly experienced, structured, and can explain with clarity.',
+      variant: 'teaching-principles',
+      foundation: {
+        label: 'Core goal',
+        value: 'Help learners choose a learning and career direction that fits them and take the next step independently.'
+      },
+      primaryItems: [
+        { label: 'Course topics', title: 'Teach only experienced, structured topics', description: 'Rather than learning a new topic solely for a request, I teach subjects grounded in my work and learning experience and organized in advance.' },
+        { label: 'Teaching goal', title: 'Experience as a reference, not an answer', description: 'I share decisions and mistakes so learners can find a learning method and career direction that fits them.' },
+        { label: 'Education access', title: 'Prioritize learners with fewer opportunities', description: 'I support nonprofit, school, and student requests when possible and prioritize learners with less access when schedules overlap.' }
+      ],
+      secondaryItems: [
+        {
+          label: 'Open to proposals',
+          title: 'Technical courses · Career talks · Mentoring',
+          description: 'I welcome proposals within my current teaching topics, including education-sharing requests from nonprofits, schools, and students.'
+        }
+      ]
+    }
+  ];
+};
 
 const developerProjectSlides = (language: PortfolioLanguage): PortfolioSlide[] => {
   if (language === 'ko') {
@@ -702,7 +1213,7 @@ export const portfolioSlides = {
           {
             label: '2019',
             title: 'ETRI 연구 인턴',
-            description: 'AI 기반 영상 편집 과제에서 프레임 편집 UI와 배경 제거 실험 흐름 구현',
+            description: 'AI 영상 프레임 편집 UI·배경 제거 실험 구현',
             meta: 'Python 3.6, Tkinter, OpenCV, GrabCut\nPillow, NumPy, Keras, scikit-learn',
             employmentType: '방학 중 학생 인턴 · 연구연수생',
             role: '영상 편집 도구 개발\n2인 팀 프로젝트',
@@ -1150,41 +1661,7 @@ export const portfolioSlides = {
     ]
   },
   instructor: {
-    ko: [
-      {
-        eyebrow: '표지',
-        title: '현업 개발 경험을 가진 백엔드 강사',
-        message:
-          '실무에서 서버를 개발하고 운영한 경험을 바탕으로, 학습자가 개념을 구현과 프로젝트 산출물로 연결하도록 돕습니다.',
-        variant: 'cover',
-        image: { src: '/portfolio/images/portfolio-evidence/instructor-profile.png', alt: '강사 당현아 프로필 이미지' },
-        primaryItems: [
-          { label: '분야', title: '백엔드 · 프로젝트 코칭', description: '백엔드 학습과 프로젝트 수행 흐름 코칭' },
-          { label: '경험', title: '현업 백엔드 개발', description: '현업 서버 개발과 운영 경험 기반 설명' },
-          { label: '멘토링', title: '이력서 · 포트폴리오', description: '프로젝트 경험을 문서와 산출물로 정리하도록 피드백' },
-          { label: '강의', title: '자료구조 · 알고리즘', description: '개념 이해와 구현 흐름을 연결하는 강의' }
-        ],
-        tags: ['강의', '멘토링', '프로젝트 코칭']
-      },
-      ...createPlanningSlides('ko')
-    ],
-    en: [
-      {
-        eyebrow: 'Cover',
-        title: 'Backend instructor with hands-on industry experience',
-        message:
-          'I use practical server development and operations experience as context while focusing this portfolio on lectures, mentoring, and project coaching.',
-        variant: 'cover',
-        image: { src: '/portfolio/images/portfolio-evidence/instructor-profile.png', alt: 'Instructor profile image of Dang Hyeona' },
-        primaryItems: [
-          { label: 'Area', title: 'Backend · Project Coaching', description: 'Coaching backend learning and project execution flow' },
-          { label: 'Experience', title: 'Production Backend', description: 'Explaining from hands-on server development and operations experience' },
-          { label: 'Mentoring', title: 'Resume · Portfolio', description: 'Reviewing project experience into documents and artifacts' },
-          { label: 'Lecture', title: 'Data Structures · Algorithms', description: 'Connecting concepts to implementation flow' }
-        ],
-        tags: ['Lecture', 'Mentoring', 'Project Coaching']
-      },
-      ...createPlanningSlides('en')
-    ]
+    ko: instructorSlides('ko'),
+    en: instructorSlides('en')
   }
 } as const satisfies Record<PortfolioTrack, Record<PortfolioLanguage, readonly PortfolioSlide[]>>;
