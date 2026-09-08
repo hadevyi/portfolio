@@ -9,6 +9,7 @@ export default defineConfig({
   site: 'https://hadevyi.github.io',
   base: '/portfolio',
   output: 'static',
+  compressHTML: true,
   devToolbar: {
     enabled: false
   },
